@@ -26,6 +26,7 @@ languages = {
 }
 
 text = st.text_area("Enter your text:")
+st.caption(f"Characters: {len(text)}")
 
 col1, col2 = st.columns(2)
 
@@ -57,7 +58,16 @@ if st.button("Translate"):
 
                 st.success("Translation completed!")
                 st.subheader("Translated Text:")
-                st.write(translated_text)
+                st.code(translated_text, language=None)
+
+                st.code(translated_text, language=None)
+
+                st.button(
+                    "📋 Copy Translation",
+                    on_click=st.write,
+                    args=(translated_text,)
+                )
+
 
             except Exception as e:
                 st.error(f"Translation failed: {e}")
