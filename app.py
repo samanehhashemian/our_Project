@@ -2,16 +2,21 @@
 import streamlit as st
 from deep_translator import MyMemoryTranslator
 
+# Page Configuration
 st.set_page_config(
     page_title="Python Translator",
     page_icon="🌐",
     layout="centered"
 )
 
-# Theme Settings
+# Session State
 if "dark_mode" not in st.session_state:
     st.session_state.dark_mode = False
 
+if "translated_text" not in st.session_state:
+    st.session_state.translated_text = ""
+
+# Theme Function
 def toggle_theme():
     st.session_state.dark_mode = not st.session_state.dark_mode
 
@@ -25,6 +30,7 @@ else:
     text_color = "#000000"
     box_color = "#F0F2F6"
 
+# Custom CSS
 st.markdown(f"""
 <style>
     .stApp {{
@@ -53,7 +59,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-
+# Dark / Light Mode Button
 col1, col2 = st.columns([4, 1])
 
 with col2:
@@ -62,11 +68,12 @@ with col2:
     else:
         st.button("🌙 Dark Mode", on_click=toggle_theme)
 
-
+# Application Title
 st.title("🌐 Python Translator")
 st.write("Welcome to our university project!")
 st.subheader("Translate your text")
 
+# Supported Languages
 languages = {
     "Persian": "fa-IR",
     "English": "en-GB",
@@ -78,42 +85,34 @@ languages = {
     "Italian": "it-IT",
     "Russian": "ru-RU",
     "Chinese": "zh-CN",
-    "Persian": "fa",
-    "English": "en",
-    "German": "de",
-    "French": "fr",
-    "Spanish": "es",
-    "Arabic": "ar",
-    "Turkish": "tr",
-    "Italian": "it",
-    "Russian": "ru",
-    "Chinese": "zh-CN",
-    "Japanese": "ja",
-    "Korean": "ko",
-    "Portuguese": "pt",
-    "Dutch": "nl",
-    "Greek": "el",
-    "Swedish": "sv",
-    "Polish": "pl",
-    "Ukrainian": "uk",
-    "Hindi": "hi",
-    "Urdu": "ur",
-    "Hebrew": "he",
-    "Indonesian": "id",
-    "Vietnamese": "vi",
-    "Thai": "th",
-    "Danish": "da",
-    "Norwegian": "no",
-    "Finnish": "fi",
-    "Romanian": "ro",
-    "Czech": "cs",
-    "Hungarian": "hu"
-
+    "Japanese": "ja-JP",
+    "Korean": "ko-KR",
+    "Portuguese": "pt-PT",
+    "Dutch": "nl-NL",
+    "Greek": "el-GR",
+    "Swedish": "sv-SE",
+    "Polish": "pl-PL",
+    "Ukrainian": "uk-UA",
+    "Hindi": "hi-IN",
+    "Urdu": "ur-PK",
+    "Hebrew": "he-IL",
+    "Indonesian": "id-ID",
+    "Vietnamese": "vi-VN",
+    "Thai": "th-TH",
+    "Danish": "da-DK",
+    "Norwegian": "nb-NO",
+    "Finnish": "fi-FI",
+    "Romanian": "ro-RO",
+    "Czech": "cs-CZ",
+    "Hungarian": "hu-HU"
 }
 
+# Text Input
 text = st.text_area("Enter your text:")
+
 st.caption(f"Characters: {len(text)}")
 
+# Language Selection
 col1, col2 = st.columns(2)
 
 with col1:
@@ -129,33 +128,52 @@ with col2:
         index=1
     )
 
-if st.button("Translate"):
-    if text:
-        if source_lang == target_lang:
-            st.warning("Please select two different languages.")
-        else:
-            try:
+# Translation Button
+if st.button("Translate", use_container_width=True):
+
+    if not text.strip():
+        st.warning("Please enter some text first.")
+
+    elif source_lang == target_lang:
+        st.warning("Please select two different languages.")
+
+    else:
+        try:
+            with st.spinner("Translating..."):
+
                 translator = MyMemoryTranslator(
                     source=languages[source_lang],
                     target=languages[target_lang]
                 )
 
-                translated_text = translator.translate(text)
+                result = translator.translate(text=text)
 
+            if result:
+                st.session_state.translated_text = result
                 st.success("Translation completed!")
-                st.subheader("Translated Text:")
-                st.code(translated_text, language=None)
 
-                st.code(translated_text, language=None)
+            else:
+                st.session_state.translated_text = ""
+                st.error("Translation result is empty.")
 
-                st.button(
-                    "📋 Copy Translation",
-                    on_click=st.write,
-                    args=(translated_text,)
-                )
+        except Exception as e:
+            st.session_state.translated_text = ""
+            st.error(f"Translation failed: {e}")
 
+# Translation Result
+if st.session_state.translated_text:
 
-            except Exception as e:
-                st.error(f"Translation failed: {e}")
-    else:
-        st.warning("Please enter some text first.")
+    st.subheader("Translated Text:")
+
+    st.text_area(
+        "Your Translation:",
+        value=st.session_state.translated_text,
+        height=150,
+        disabled=True
+    )
+
+    # Copy Button
+    st.button(
+        "📋 Copy Translation",
+        on_click=lambda: st.toast("Use Ctrl+C to copy the selected text.")
+    )
