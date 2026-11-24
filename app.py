@@ -8,6 +8,61 @@ st.set_page_config(
     layout="centered"
 )
 
+# Theme Settings
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
+
+def toggle_theme():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+
+# Theme Colors
+if st.session_state.dark_mode:
+    bg_color = "#0E1117"
+    text_color = "#FFFFFF"
+    box_color = "#262730"
+else:
+    bg_color = "#FFFFFF"
+    text_color = "#000000"
+    box_color = "#F0F2F6"
+
+st.markdown(f"""
+<style>
+    .stApp {{
+        background-color: {bg_color};
+        color: {text_color};
+    }}
+
+    h1, h2, h3, p, label, span {{
+        color: {text_color};
+    }}
+
+    div[data-testid="stTextArea"] textarea {{
+        background-color: {box_color};
+        color: {text_color};
+    }}
+
+    div[data-testid="stSelectbox"] div {{
+        background-color: {box_color};
+        color: {text_color};
+    }}
+
+    .stButton button {{
+        border-radius: 10px;
+        font-weight: bold;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
+
+col1, col2 = st.columns([4, 1])
+
+with col2:
+    if st.session_state.dark_mode:
+        st.button("☀️ Light Mode", on_click=toggle_theme)
+    else:
+        st.button("🌙 Dark Mode", on_click=toggle_theme)
+
+
 st.title("🌐 Python Translator")
 st.write("Welcome to our university project!")
 st.subheader("Translate your text")
